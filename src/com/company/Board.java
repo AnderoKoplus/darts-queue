@@ -5,11 +5,13 @@ package com.company;
  */
 public class Board {
     private int size;
+    private int maxSize = Main.N;
     private int[] regions;
     private int heuristicLimit = 0;
     private static int[] levelMax;
     private int max = 0;
-    private int score;
+    private long score = 0;
+    private long baseScore = 0;
 
     public Board(int i) {
         size = i;
@@ -100,33 +102,6 @@ public class Board {
         return regions;
     }
 
-//    public Board evolve() {
-//        int pos = size -1;
-//        int[] regionMap = regions.clone();
-//        if (generateRegions(regionMap, pos)) {
-//            return new Board(size, regionMap);
-//        } else {
-//            return null;
-//        }
-//    }
-//
-//    private boolean generateRegions(int[] regionMap, int pos) {
-//        if (pos == 0) {
-//            return false;
-//        }
-//        if (regionMap[pos] > regionMap[pos - 1] * 3) {
-//            if (generateRegions(regionMap, pos - 1)) {
-//                regionMap[pos - 1] = regionMap[pos - 2] + 1;
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        } else {
-//            regionMap[pos]++;
-//            return true;
-//        }
-//    }
-//
     public int getSize() {
         return size;
     }
@@ -136,16 +111,43 @@ public class Board {
     }
 
 
-    public int getScore() {
+    public long getScore() {
         if (0 == score) {
             score = calculateScore();
         }
         return score;
     }
 
-    private int calculateScore() {
-        return this.getMax();
+    private long calculateScore() {
+        return score; //this.getMax()/* + baseScore + this.getHeuristicMax()*/;
     }
 
 
+    public int getNextRegionMin() {
+        return getRegionLastValue() + 1;
+    }
+
+    public int getNextRegionMax() {
+        return getMax();
+    }
+
+    public boolean canBranch (int n) {
+        return getSize() < n;
+    }
+
+    public void addBaseScore(long addition) {
+        baseScore += addition;
+    }
+
+    public long getHeuristicMax() {
+        long max = getRegionLastValue();
+        for (int i = 0; i < (maxSize - getSize() + 1); i++) {
+            max = max * 3 + 1;
+        }
+        return max;
+    }
+
+    public void setScore(long score) {
+        this.score = score;
+    }
 }

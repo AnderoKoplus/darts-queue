@@ -5,7 +5,8 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 public class Main {
-    public static int N = 6;
+    public static int N = 25;
+    public static long ctr = 1;
 
     public static void main(String[] args) {
         PriorityQueue<Board> queue;
@@ -15,55 +16,66 @@ public class Main {
         queue.add(board);
 
         Board item;
-        int[] maxMap = new int[N + 1]; // allow +1 to make results more readable??
+//        int[] maxMap = new int[N + 1]; // allow +1 to make results more readable??
+        long max = 1;
         while (null != (item = queue.poll())) {
+//            System.out.println("Processing: " + Arrays.toString(item.getRegions()));
 //            System.out.println("Progressing with " + Arrays.toString(item.getRegions()) + " with score " + item.getScore());
-            if (item.getHeuristicLimit() < maxMap[item.getSize()]) {
-                continue;
-            }
-            if (item.getMax() > maxMap[item.getSize()]) {
-                maxMap[item.getSize()] = item.getMax();
-                System.out.println(item.getSize() + "\t" + item.getMax() + "\t" + Arrays.toString(item.getRegions()));
-            } else {
+//            if (item.getHeuristicLimit() < maxMap[item.getSize()]) {
 //                continue;
+//            }
+//            if (item.getMax() > maxMap[item.getSize()]) {
+//                maxMap[item.getSize()] = item.getMax();
+//                System.out.println(item.getSize() + "\t" + item.getMax() + "\t" + Arrays.toString(item.getRegions()));
+//            } else {
+//                 continue;
+//            }
+            if (max < item.getMax()) {
+                max = item.getMax();
+                System.out.println(item.getSize() + "\t" + item.getMax() + "\t" + Arrays.toString(item.getRegions()) + "\t" + queue.size() + "\t" + ctr);
             }
 
-//            if (item.getSize() > 2) {
-//                if (item.getMax() <= maxMap[item.getSize() - 2]) {
-////                    System.out.println("Trimming bad branch: " + Arrays.toString(item.getRegions()) + "\t" + item.getMax());
-////                    continue;
-//                }
-//            }
-//            System.out.println("H: " + item.getHeuristicLimit() + "\t M: " + item.getMax() + "\t S: " + item.getSize() + "\t" + Arrays.toString(item.getRegions()));
-
-            if (item.getSize() < N) {
+            if (item.canBranch(N)) {
+                if (max > item.getHeuristicMax()) {
+                    System.out.println("Trimming Root: " + Arrays.toString(item.getRegions()) + "\t" + max + "\t" + item.getHeuristicMax());
+                    continue;
+                }
                 int[] regions = new int[item.getSize() + 1];
-                int rangeMin, rangeMax;
-//                if (1 == item.getSize()) {
-//                    rangeMin = 2;
-//                    rangeMax = item.getMax();
-//                } else {
-//                    rangeMin = (int)(item.getRegionLastValue() * 1.25);
-//                    rangeMax = item.getRegionLastValue() * 2;
-//                }
-                rangeMin = item.getRegionLastValue() + 1;
-                rangeMax = item.getRegionLastValue() * 3 + 1;
                 System.arraycopy(item.getRegions(), 0, regions, 0, item.getSize());
-//                System.out.println("Original: " + Arrays.toString(item.getRegions())+ " Range[" + rangeMin + "; " + rangeMax + "]");
-                for (int i = rangeMin; i <= rangeMax; i++) {
+//                System.out.println("Original: " + Arrays.toString(item.getRegions())+ " Range[" + item.getNextRegionMin() + "; " + item.getNextRegionMax() + "]");
+                for (int i = item.getNextRegionMin(); i <= item.getNextRegionMax(); i++) {
                     regions[item.getSize()] = i;
                     Board newBoard = new Board(regions);
+                    if (max > newBoard.getHeuristicMax()) {
+//                        if (newBoard.getRegions().length < N - 1) {
+//                            System.out.println("Skipping board: " + Arrays.toString(newBoard.getRegions())
+//                                    + "\t" + max
+//                                    + "\t" + newBoard.getHeuristicMax()
+//                                    + "\t" + queue.size()
+//                                    + "\t" + newBoard.getRegions().length + "/" + N
+//                            );
+//                        }
+                        continue;
+                    }
+                    newBoard.addBaseScore(item.getScore());
+//                    System.out.println(Arrays.toString(newBoard.getRegions())+ "\t" + newBoard.getHeuristicMax());
+                    newBoard.setScore(++ctr);
                     queue.add(newBoard);
-                    System.out.println("Adding: " + Arrays.toString(regions) + "\t" + newBoard.getScore() + "\t" + newBoard.getMax());
+//                    System.out.println("Adding: " + Arrays.toString(regions) + "\t" + newBoard.getScore() + "\t" + queue.size());
                 }
 //                if (item.getSize() == 6) {
 //                    System.exit(-1);
 //                }
             }
+            if (0 == queue.size()) {
+                break;
+            }
         }
-        for (int i = 1; i <= N; i++) {
-            System.out.println(i + "\t" + maxMap[i]);
-        }
+        System.out.println("-----");
+//        for (int i = 1; i <= N; i++) {
+//            System.out.println(i + "\t" + maxMap[i]);
+            System.out.println(N + "\t" + max);
+//        }
     }
 
 }
